@@ -51,6 +51,15 @@ UKF::UKF() {
 
   Hint: one or more values initialized above might be wildly off...
   */
+    
+  is_initialized_ = false;
+    
+//  MatrixXd Xsig_pred_ = ;
+//    VectorXd weights_ = ;
+//    int n_x_ = ;
+//    int n_aug_ = ;
+//    double lambda_ = ;
+    
 }
 
 UKF::~UKF() {}
