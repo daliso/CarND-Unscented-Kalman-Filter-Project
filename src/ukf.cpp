@@ -172,27 +172,7 @@ void UKF::Prediction(double delta_t) {
      vector, x_. Predict sigma points, the state, and the state covariance matrix.
      */
     
-    //define spreading parameter
-    lambda_ = 3 - n_x_;
-    
-    //create sigma point matrix
-    MatrixXd Xsig = MatrixXd(n_x_, 2 * n_x_ + 1);
-    
-    //calculate square root of P
-    MatrixXd A = P_.llt().matrixL();
-    
-    Xsig.col(0)  = x_;
-    
-    //set remaining sigma points
-    for (int i = 0; i < n_x_; i++)
-    {
-        Xsig.col(i+1)     = x_ + sqrt(lambda_+n_x_) * A.col(i);
-        Xsig.col(i+1+n_x_) = x_ - sqrt(lambda_+n_x_) * A.col(i);
-    }
-    
-    //define spreading parameter
-    lambda_ = 3 - n_aug_;
-    
+  
     //create augmented mean vector
     VectorXd x_aug = VectorXd(7);
     
@@ -272,18 +252,6 @@ void UKF::Prediction(double delta_t) {
         Xsig_pred_(4,i) = yawd_p;
     }
     
-    
-    //create vector for weights
-    //    VectorXd weights = VectorXd(2*n_aug_+1);
-    
-    // set weights
-    //    double weight_0 = lambda_/(lambda_+n_aug_);
-    //    weights(0) = weight_0;
-    //    for (int i=1; i<2*n_aug_+1; i++) {  //2n+1 weights
-    //        double weight = 0.5/(n_aug_+lambda_);
-    //        weights(i) = weight;
-    //    }
-    
     //predicted state mean
     x_.fill(0.0);
     for (int i = 0; i < 2 * n_aug_ + 1; i++) {  //iterate over sigma points
@@ -302,7 +270,6 @@ void UKF::Prediction(double delta_t) {
         
         P_ = P_ + weights_(i) * x_diff * x_diff.transpose() ;
     }
-    
     
 }
 
@@ -323,11 +290,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
     
     //set measurement dimension, radar can measure r, phi, and r_dot
     int n_z = 2;
-    
-    //define spreading parameter
-    lambda_ = 3 - n_aug_;
-    
-    
+
     //create matrix for sigma points in measurement space
     MatrixXd Zsig = MatrixXd(n_z, 2 * n_aug_ + 1);
     
@@ -386,15 +349,9 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
         
         //residual
         VectorXd z_diff = Zsig.col(i) - z_pred;
-        //        //angle normalization
-        //        while (z_diff(1)> M_PI) z_diff(1)-=2.*M_PI;
-        //        while (z_diff(1)<-M_PI) z_diff(1)+=2.*M_PI;
         
         // state difference
         VectorXd x_diff = Xsig_pred_.col(i) - x_;
-        //angle normalization
-        //        while (x_diff(3)> M_PI) x_diff(3)-=2.*M_PI;
-        //        while (x_diff(3)<-M_PI) x_diff(3)+=2.*M_PI;
         
         Tc = Tc + weights_(i) * x_diff * z_diff.transpose();
     }
@@ -404,10 +361,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
     
     //residual
     VectorXd z_diff = z - z_pred;
-    
-    //angle normalization
-    //    while (z_diff(1)> M_PI) z_diff(1)-=2.*M_PI;
-    //    while (z_diff(1)<-M_PI) z_diff(1)+=2.*M_PI;
     
     //update state mean and covariance matrix
     x_ = x_ + K * z_diff;
@@ -432,11 +385,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     
     //set measurement dimension, radar can measure r, phi, and r_dot
     int n_z = 3;
-    
-    //define spreading parameter
-    lambda_ = 3 - n_aug_;
-    
-    
+
     //create matrix for sigma points in measurement space
     MatrixXd Zsig = MatrixXd(n_z, 2 * n_aug_ + 1);
     
